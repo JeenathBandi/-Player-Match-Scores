@@ -63,7 +63,8 @@ app.put("/players/:playerId/", async (request, response) => {
   const { playerName } = request.body;
   const updateDBQuery = `
         UPDATE player_details
-        SET player_name = '${playerName}';`;
+        SET player_name = '${playerName}'
+        WHERE player_id = ${playerId};`;
   const dbResponse = await db.run(updateDBQuery);
   response.send("Player Details Updated");
 });
@@ -71,7 +72,7 @@ app.put("/players/:playerId/", async (request, response) => {
 app.get("/matches/:matchId/", async (request, response) => {
   const { matchId } = request.params;
   const getMatchQuery = `
-        SELECT * FROM match_Details
+        SELECT * FROM match_details
         WHERE match_id = ${matchId};
     `;
   const dbArray = await db.get(getMatchQuery);
@@ -85,7 +86,7 @@ app.get("/players/:playerId/matches", async (request, response) => {
     FROM 
         match_details JOIN player_match_score
     WHERE 
-        player_id = ${playerId};`;
+        player_match_score.player_id = ${playerId};`;
   const dbResponse = await db.all(getMatchIdQuery);
   response.send(dbResponse.map((eachArray) => convertToObjectMatch(eachArray)));
 });
@@ -94,7 +95,7 @@ app.get("/matches/:matchId/players", async (request, response) => {
   const { matchId } = request.params;
   const getPlayersQuery = `
         SELECT player_details.player_id,player_details.player_name FROM player_details JOIN player_match_score
-        WHERE match_id  = ${matchId};
+        WHERE player_match_score.match_id  = ${matchId};
     `;
   const dbArray = await db.all(getPlayersQuery);
   response.send(dbArray.map((eachArray) => convertToObject(eachArray)));
